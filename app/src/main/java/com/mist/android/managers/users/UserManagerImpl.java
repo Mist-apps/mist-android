@@ -63,6 +63,11 @@ public class UserManagerImpl implements UserManager {
     }
 
     @Override
+    public Token getCurrentToken() {
+        return mCurrentToken;
+    }
+
+    @Override
     public void login(ActionDelegate<Token> delegate, String login, String password) {
         // Check if we have a session in cache.
         if (mCurrentToken != null && mCurrentToken.isValid()) {

@@ -1,5 +1,6 @@
 package com.mist.android.login;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.EditText;
 import com.google.inject.Inject;
 import com.mist.android.R;
 import com.mist.android.globals.ActionDelegate;
+import com.mist.android.main.MainActivity;
 import com.mist.android.managers.users.UserManager;
 import com.mist.android.util.LogWrapper;
 
@@ -40,6 +42,10 @@ public class LoginActivity extends RoboFragmentActivity implements ActionDelegat
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final Token currentToken = mUserManager.getCurrentToken();
+        if (currentToken != null && currentToken.isValid()) {
+            startNextActivity(currentToken);
+        }
         setContentView(R.layout.activity_login);
 
         // Set up the login form.
@@ -102,7 +108,7 @@ public class LoginActivity extends RoboFragmentActivity implements ActionDelegat
     public void onSuccess(Token result) {
         mValidLoginButton.setEnabled(false);
         logger.d(TAG, "Token : " + result);
-        //finish();
+        startNextActivity(result);
     }
 
     @Override
@@ -111,6 +117,11 @@ public class LoginActivity extends RoboFragmentActivity implements ActionDelegat
         mValidLoginButton.setEnabled(true);
         mPasswordView.setError(getString(R.string.error_incorrect_password));
         mPasswordView.requestFocus();
+    }
+
+    private void startNextActivity(Token currentToken) {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 }
 
