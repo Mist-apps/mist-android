@@ -10,6 +10,14 @@ public class User {
     public final String mail;
     public final String login;
 
+    public User(String _id) {
+        this._id = _id;
+        this.firstName = "";
+        this.lastName = "";
+        this.mail = "";
+        this.login = "";
+    }
+
     public User(String _id, String firstName, String lastName, String mail, String login) {
         this._id = _id;
         this.firstName = firstName;

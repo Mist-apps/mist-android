@@ -4,12 +4,14 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.inject.Inject;
 import com.mist.android.R;
 import com.mist.android.globals.ActionDelegate;
 import com.mist.android.managers.users.UserManager;
+import com.mist.android.util.LogWrapper;
 
 import roboguice.activity.RoboFragmentActivity;
 
@@ -18,12 +20,22 @@ import roboguice.activity.RoboFragmentActivity;
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends RoboFragmentActivity implements ActionDelegate<Token> {
+    private static final String TAG = "LoginActivity";
+    /**
+     * Logger.
+     */
+    @Inject
+    LogWrapper logger;
+    /**
+     * Manager to handle users.
+     */
     @Inject
     UserManager mUserManager;
 
     // UI references.
     private EditText mEmailView;
     private EditText mPasswordView;
+    private Button mValidLoginButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +46,8 @@ public class LoginActivity extends RoboFragmentActivity implements ActionDelegat
         mEmailView = (EditText) findViewById(R.id.email);
         mPasswordView = (EditText) findViewById(R.id.password);
 
-        findViewById(R.id.email_sign_in_button).setOnClickListener(new OnClickListener() {
+        mValidLoginButton = (Button) findViewById(R.id.email_sign_in_button);
+        mValidLoginButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
@@ -48,6 +61,7 @@ public class LoginActivity extends RoboFragmentActivity implements ActionDelegat
      * errors are presented and no actual login attempt is made.
      */
     public void attemptLogin() {
+        mValidLoginButton.setEnabled(false);
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -86,12 +100,15 @@ public class LoginActivity extends RoboFragmentActivity implements ActionDelegat
 
     @Override
     public void onSuccess(Token result) {
-        System.out.println(result);
+        mValidLoginButton.setEnabled(false);
+        logger.d(TAG, "Token : " + result);
         //finish();
     }
 
     @Override
     public void onError(Exception e) {
+        logger.e(TAG, "Error during the login", e);
+        mValidLoginButton.setEnabled(true);
         mPasswordView.setError(getString(R.string.error_incorrect_password));
         mPasswordView.requestFocus();
     }

@@ -6,12 +6,29 @@ package com.mist.android.login;
 public class Token {
     public final String token;
     public final long expires;
-    public final User user;
+    private User user;
+
+    public Token(String token, long expires) {
+        this.token = token;
+        this.expires = expires;
+    }
 
     public Token(String token, long expires, User user) {
         this.token = token;
         this.expires = expires;
         this.user = user;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public boolean isValid() {
+        return System.currentTimeMillis() < expires;
     }
 
     @Override
