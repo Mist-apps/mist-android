@@ -1,4 +1,4 @@
-package com.mist.android.main;
+package com.mist.android.main.navigation;
 
 import android.app.Activity;
 import android.content.SharedPreferences;

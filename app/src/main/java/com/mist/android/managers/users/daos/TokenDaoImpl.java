@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.mist.android.AbstractDao;
 import com.mist.android.login.Token;
 
@@ -14,6 +15,7 @@ import java.util.List;
 /**
  * Created by gerard on 25/06/14.
  */
+@Singleton
 public class TokenDaoImpl extends AbstractDao implements TokenDao {
 
     private String[] ALL_COLUMNS = {

@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,8 +13,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mist.android.R;
+import com.mist.android.main.navigation.NavigationDrawerFragment;
+import com.mist.android.main.notes.AllFragment;
 
-public class MainActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+import roboguice.activity.RoboActionBarActivity;
+
+public class MainActivity extends RoboActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -42,11 +45,20 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
+        // update the main content by replacing fragments.
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
+        switch (position) {
+            case 0:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, AllFragment.newInstance())
+                        .commit();
+                break;
+            default:
+                fragmentManager.beginTransaction()
+                        .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                        .commit();
+                break;
+        }
     }
 
     public void onSectionAttached(int number) {
