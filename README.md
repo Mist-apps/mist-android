@@ -1,4 +1,4 @@
 mist-android
 ============
 
-Mist Android
+Awesome app Android for Mist.
