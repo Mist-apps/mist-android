@@ -32,8 +32,8 @@ public class TodoHolder implements TypedHolder<Note> {
             mTextViewTitle.setVisibility(View.VISIBLE);
             mTextViewTitle.setText(content.title);
         }
-        if (content.content != null) {
-            mTextViewContent.setText("Bad " + content.content);
+        if (content.getContent() != null) {
+            mTextViewContent.setText("Bad " + content.getContent());
         } else {
             mTextViewContent.setText("Tasks");
         }

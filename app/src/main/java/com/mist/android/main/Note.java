@@ -1,5 +1,6 @@
 package com.mist.android.main;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,10 +11,19 @@ public class Note {
     public final String _revision;
     public final String _user;
     public final String title;
-    public final String content;
-    public final List<Task> tasks;
+    private String content;
+    private List<Task> tasks = new ArrayList<Task>();
     public final long creationDate;
     public final long modificationDate;
+
+    public Note(String _id, String _revision, String _user, String title, long creationDate, long modificationDate) {
+        this._id = _id;
+        this._revision = _revision;
+        this._user = _user;
+        this.title = title;
+        this.creationDate = creationDate;
+        this.modificationDate = modificationDate;
+    }
 
     public Note(String _id, String _revision, String _user, String title, String content, List<Task> tasks, long creationDate, long modificationDate) {
         this._id = _id;
@@ -24,6 +34,22 @@ public class Note {
         this.tasks = tasks;
         this.creationDate = creationDate;
         this.modificationDate = modificationDate;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public List<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
     }
 
     public boolean hasTasks() {

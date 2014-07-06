@@ -32,8 +32,8 @@ public class NoteHolder implements TypedHolder<Note> {
             mTextViewTitle.setVisibility(View.VISIBLE);
             mTextViewTitle.setText(content.title);
         }
-        if (content.content != null) {
-            mTextViewContent.setText(content.content);
+        if (content.getContent() != null) {
+            mTextViewContent.setText(content.getContent());
         } else {
             mTextViewContent.setText("Bad Tasks");
         }

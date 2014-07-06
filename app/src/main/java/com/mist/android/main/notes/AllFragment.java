@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 
 import com.google.inject.Inject;
 import com.mist.android.R;
-import com.mist.android.adapters.Factory;
-import com.mist.android.adapters.Holder;
 import com.mist.android.adapters.TypedFactory;
 import com.mist.android.adapters.TypedHolder;
 import com.mist.android.adapters.TypedHolderAdapter;
@@ -57,13 +55,6 @@ public class AllFragment extends RoboListFragment implements ActionDelegate<List
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        final Factory<Holder<Note>> factory = new Factory<Holder<Note>>() {
-            @Override
-            public Holder<Note> create() {
-                return new NoteHolder();
-            }
-        };
-
         List<TypedFactory<Note>> factories = new ArrayList<TypedFactory<Note>>();
         factories.add(new TypedFactory<Note>() {
             @Override

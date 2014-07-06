@@ -6,6 +6,12 @@ import com.google.inject.Provides;
 import com.google.inject.name.Named;
 import com.mist.android.managers.notes.NoteManager;
 import com.mist.android.managers.notes.NoteManagerImpl;
+import com.mist.android.managers.notes.daos.ContentDao;
+import com.mist.android.managers.notes.daos.ContentDaoImpl;
+import com.mist.android.managers.notes.daos.NoteDao;
+import com.mist.android.managers.notes.daos.NoteDaoImpl;
+import com.mist.android.managers.notes.daos.TaskDao;
+import com.mist.android.managers.notes.daos.TaskDaoImpl;
 import com.mist.android.managers.users.UserManager;
 import com.mist.android.managers.users.UserManagerImpl;
 import com.mist.android.managers.users.daos.TokenDao;
@@ -35,6 +41,9 @@ public class MistModule implements Module {
         binder.bind(UserManager.class).to(UserManagerImpl.class);
 
         // Notes.
+        binder.bind(ContentDao.class).to(ContentDaoImpl.class);
+        binder.bind(TaskDao.class).to(TaskDaoImpl.class);
+        binder.bind(NoteDao.class).to(NoteDaoImpl.class);
         binder.bind(NoteManager.class).to(NoteManagerImpl.class);
     }
 

@@ -35,17 +35,17 @@ public class UserManagerImpl implements UserManager {
      * Logger.
      */
     @Inject
-    LogWrapper logger;
+    LogWrapper mLogger;
     /**
      * Dao to save token of the user in the local database.
      */
     @Inject
-    TokenDao tokenDao;
+    TokenDao mTokenDao;
     /**
      * Dao to save user in the local database.
      */
     @Inject
-    UserDao userDao;
+    UserDao mUserDao;
     /**
      * Provider to log in the user.
      */
@@ -68,24 +68,24 @@ public class UserManagerImpl implements UserManager {
     public void login(ActionDelegate<Token> delegate, String login, String password) {
         // Check if we have a session in cache.
         if (mCurrentToken != null && mCurrentToken.isValid()) {
-            logger.d(TAG, "Cache hit");
+            mLogger.d(TAG, "Cache hit");
             delegate.onSuccess(mCurrentToken);
             return;
         }
         // Check if we have a session in local database.
-        User user = userDao.get(login);
+        User user = mUserDao.get(login);
         if (user != null) {
-            Token token = tokenDao.get(user._id);
+            Token token = mTokenDao.get(user._id);
             if (token != null && token.isValid()) {
-                logger.d(TAG, "Database hit");
+                mLogger.d(TAG, "Database hit");
                 token.setUser(user);
                 mCurrentToken = token;
                 delegate.onSuccess(token);
                 return;
             }
         }
-        // Otherwise, we make a request on the database.
-        logger.d(TAG, "Action hit");
+        // Otherwise, we make an online request.
+        mLogger.d(TAG, "Action hit");
         mGetLoginAction.get().perform(mUserInterface, new LoginDelegate(delegate), login, password);
     }
 
@@ -102,8 +102,8 @@ public class UserManagerImpl implements UserManager {
 
         @Override
         public void onSuccess(Token result) {
-            userDao.save(result.getUser());
-            tokenDao.save(result);
+            mUserDao.save(result.getUser());
+            mTokenDao.save(result);
             mCurrentToken = result;
             mNext.onSuccess(result);
         }
