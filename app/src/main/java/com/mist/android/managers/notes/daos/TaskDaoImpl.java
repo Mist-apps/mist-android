@@ -59,6 +59,48 @@ public class TaskDaoImpl extends AbstractDao implements TaskDao {
     }
 
     @Override
+    public int update(String identifier, Note note) {
+        if (identifier == null || identifier.isEmpty()) {
+            return -1;
+        }
+        if (note == null) {
+            return -1;
+        }
+        try {
+            open();
+            if (note.getTasks() != null && !note.getTasks().isEmpty()) {
+                ContentValues params;
+                Task currentTask;
+                for (int i = 0; i < note.getTasks().size(); i++) {
+                    params = new ContentValues();
+                    currentTask = note.getTasks().get(i);
+                    params.put(NAME_COLUMN_TASK_ORDER, i);
+                    params.put(NAME_COLUMN_TASK_CONTENT, currentTask.content);
+                    params.put(NAME_COLUMN_TASK_DONE, currentTask.done ? 1 : 0);
+                    params.put(NAME_COLUMN_TASK_NOTE, note._id);
+                    mDataBase.update(DATABASE_TABLE_TASKS, params, NAME_COLUMN_TASK_NOTE + " = ?", new String[]{identifier});
+                }
+            }
+            return 1;
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public int remove(String identifier) {
+        if (identifier == null || identifier.isEmpty()) {
+            return -1;
+        }
+        try {
+            open();
+            return mDataBase.delete(DATABASE_TABLE_TASKS, NAME_COLUMN_TASK_NOTE + " = ?", new String[]{identifier});
+        } finally {
+            close();
+        }
+    }
+
+    @Override
     public List<Task> getAll(Note note) {
         if (note == null) {
             return new ArrayList<Task>();

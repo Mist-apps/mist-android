@@ -17,6 +17,23 @@ public interface ContentDao extends Dao {
     int save(final Note note);
 
     /**
+     * Update content of a note in the local database.
+     *
+     * @param identifier Identifier of a note.
+     * @param note       Note to update.
+     * @return rows affected.
+     */
+    int update(final String identifier, final Note note);
+
+    /**
+     * Remove content of a note in the local database.
+     *
+     * @param identifier Identifier of a note.
+     * @return rows affected.
+     */
+    int remove(final String identifier);
+
+    /**
      * Gets content of a note.
      *
      * @param note Note potentially concerned by his content.

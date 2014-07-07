@@ -39,7 +39,7 @@ public class NoteDaoImpl extends AbstractDao implements NoteDao {
 
     @Override
     public int save(Note note) {
-        if (note == null) {
+        if (note == null || contains(note._id)) {
             return -1;
         }
         try {
@@ -63,6 +63,70 @@ public class NoteDaoImpl extends AbstractDao implements NoteDao {
     }
 
     @Override
+    public int update(String identifier, Note note) {
+        if (identifier == null || identifier.isEmpty()) {
+            return -1;
+        }
+        if (note == null || !contains(note._id)) {
+            return -1;
+        }
+        try {
+            open();
+            // Update all tasks if necessary.
+            mTaskDao.update(identifier, note);
+            // Update content if necessary.
+            mContentDao.update(identifier, note);
+            // Update metadata of the note.
+            ContentValues params = new ContentValues();
+            params.put(NAME_COLUMN_NOTE_ID, note._id);
+            params.put(NAME_COLUMN_NOTE_REVISION, note._revision);
+            params.put(NAME_COLUMN_NOTE_USER, note._user);
+            params.put(NAME_COLUMN_NOTE_TITLE, note.title);
+            params.put(NAME_COLUMN_NOTE_CREATION, note.creationDate);
+            params.put(NAME_COLUMN_NOTE_MODIFICATION, note.modificationDate);
+            return mDataBase.update(DATABASE_TABLE_NOTE, params, NAME_COLUMN_NOTE_ID + " = ?", new String[]{identifier});
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public int remove(String identifier) {
+        if (identifier == null || identifier.isEmpty()) {
+            return -1;
+        }
+        try {
+            open();
+            // Remove all tasks for the note given.
+            mTaskDao.remove(identifier);
+            // Remove content for the note given.
+            mContentDao.remove(identifier);
+            // Remove note.
+            return mDataBase.delete(DATABASE_TABLE_NOTE, NAME_COLUMN_NOTE_ID + " = ?", new String[]{identifier});
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public Note get(String identifier) {
+        if (identifier == null || identifier.isEmpty()) {
+            return null;
+        }
+        try {
+            open();
+            final Cursor cNotes = mDataBase.query(DATABASE_TABLE_NOTE, ALL_COLUMNS_NOTE, NAME_COLUMN_NOTE_ID + " = ?", new String[]{identifier}, null, null, null);
+            final List<Note> notesFromCursor = getNotesFromCursor(cNotes);
+            if (notesFromCursor.size() == 0) {
+                return null;
+            }
+            return notesFromCursor.get(0);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
     public List<Note> getAll() {
         try {
             open();
@@ -75,6 +139,21 @@ public class NoteDaoImpl extends AbstractDao implements NoteDao {
                 }
             }
             return notesFromCursor;
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public boolean contains(String identifier) {
+        if (identifier == null || identifier.isEmpty()) {
+            return false;
+        }
+        try {
+            open();
+            final Cursor cNotes = mDataBase.query(DATABASE_TABLE_NOTE, ALL_COLUMNS_NOTE, NAME_COLUMN_NOTE_ID + " = ?", new String[]{identifier}, null, null, null);
+            final List<Note> notesFromCursor = getNotesFromCursor(cNotes);
+            return notesFromCursor.size() != 0;
         } finally {
             close();
         }

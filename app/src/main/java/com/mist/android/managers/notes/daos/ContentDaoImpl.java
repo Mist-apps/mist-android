@@ -49,6 +49,41 @@ public class ContentDaoImpl extends AbstractDao implements ContentDao {
     }
 
     @Override
+    public int update(String identifier, Note note) {
+        if (identifier == null || identifier.isEmpty()) {
+            return -1;
+        }
+        if (note == null) {
+            return -1;
+        }
+        try {
+            open();
+            if (note.getContent() != null && !note.getContent().isEmpty()) {
+                ContentValues params = new ContentValues();
+                params.put(NAME_COLUMN_CONTENT_CONTENT, note.getContent());
+                params.put(NAME_COLUMN_CONTENT_NOTE, note._id);
+                mDataBase.update(DATABASE_TABLE_CONTENT, params, NAME_COLUMN_CONTENT_NOTE + " = ?", new String[]{identifier});
+            }
+            return 1;
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public int remove(String identifier) {
+        if (identifier == null || identifier.isEmpty()) {
+            return -1;
+        }
+        try {
+            open();
+            return mDataBase.delete(DATABASE_TABLE_CONTENT, NAME_COLUMN_CONTENT_NOTE + " = ?", new String[]{identifier});
+        } finally {
+            close();
+        }
+    }
+
+    @Override
     public String get(Note note) {
         if (note == null) {
             return null;

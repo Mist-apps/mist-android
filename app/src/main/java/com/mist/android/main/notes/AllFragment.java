@@ -2,6 +2,7 @@ package com.mist.android.main.notes;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,13 +28,14 @@ import roboguice.fragment.RoboListFragment;
 /**
  * Created by gerard on 25/06/14.
  */
-public class AllFragment extends RoboListFragment implements ActionDelegate<List<Note>> {
+public class AllFragment extends RoboListFragment implements ActionDelegate<List<Note>>, SwipeRefreshLayout.OnRefreshListener {
 
     @Inject
     LogWrapper mLogWrapper;
     @Inject
     NoteManager mNoteManager;
 
+    private SwipeRefreshLayout mSrlContainer;
     private TypedHolderAdapter<Note> mAdapter;
 
     public static AllFragment newInstance() {
@@ -49,7 +51,14 @@ public class AllFragment extends RoboListFragment implements ActionDelegate<List
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_notes, container, false);
+        final View root = inflater.inflate(R.layout.fragment_notes, container, false);
+        mSrlContainer = (SwipeRefreshLayout) root.findViewById(R.id.notes_srl_container);
+        mSrlContainer.setOnRefreshListener(this);
+        mSrlContainer.setColorScheme(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+        return root;
     }
 
     @Override
@@ -81,17 +90,28 @@ public class AllFragment extends RoboListFragment implements ActionDelegate<List
         mAdapter = new TypedHolderAdapter<Note>(getActivity(), factories);
         setListAdapter(mAdapter);
 
-        mNoteManager.getAll(this);
+        // Force refresh of notes if bundle is null (first launch of the fragment), otherwise,
+        // we hope to hit on the cache or database.
+        mNoteManager.getAll(this, savedInstanceState == null);
     }
 
     @Override
     public void onSuccess(List<Note> result) {
+        if (mSrlContainer.isRefreshing()) {
+            mSrlContainer.setRefreshing(false);
+        }
         mLogWrapper.d("MainActivity", "Success : " + result);
+        mAdapter.clear();
         mAdapter.addAll(result);
     }
 
     @Override
     public void onError(Exception e) {
         mLogWrapper.d("MainActivity", "Error", e);
+    }
+
+    @Override
+    public void onRefresh() {
+        mNoteManager.getAll(this, true);
     }
 }

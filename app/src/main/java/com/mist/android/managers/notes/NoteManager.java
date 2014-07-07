@@ -17,4 +17,12 @@ public interface NoteManager {
      */
     void getAll(ActionDelegate<List<Note>> delegate);
 
+    /**
+     * Gets all notes of the current user.
+     *
+     * @param delegate Delegate to inform the result.
+     * @param force    Force the refreshing.
+     */
+    void getAll(ActionDelegate<List<Note>> delegate, boolean force);
+
 }

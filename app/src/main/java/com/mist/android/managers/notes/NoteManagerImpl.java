@@ -61,19 +61,27 @@ public class NoteManagerImpl implements NoteManager {
 
     @Override
     public void getAll(ActionDelegate<List<Note>> delegate) {
-        // Check if we have notes in cache.
-        if (mCurrentNotes != null && !mCurrentNotes.isEmpty()) {
-            mLogger.d(TAG, "Cache hit");
-            delegate.onSuccess(mCurrentNotes);
-            return;
-        }
-        // Check if we have notes in local database.
-        final List<Note> notes = mNoteDao.getAll();
-        if (notes != null && !notes.isEmpty()) {
-            mLogger.d(TAG, "Database hit");
-            mCurrentNotes = notes;
-            delegate.onSuccess(mCurrentNotes);
-            return;
+        getAll(delegate, false);
+    }
+
+    @Override
+    public void getAll(ActionDelegate<List<Note>> delegate, boolean force) {
+        // If we would like force the update of notes, we don't make request on cache and database.
+        if (!force) {
+            // Check if we have notes in cache.
+            if (mCurrentNotes != null && !mCurrentNotes.isEmpty()) {
+                mLogger.d(TAG, "Cache hit");
+                delegate.onSuccess(mCurrentNotes);
+                return;
+            }
+            // Check if we have notes in local database.
+            final List<Note> notes = mNoteDao.getAll();
+            if (notes != null && !notes.isEmpty()) {
+                mLogger.d(TAG, "Database hit");
+                mCurrentNotes = notes;
+                delegate.onSuccess(mCurrentNotes);
+                return;
+            }
         }
         // Otherwise, we make an online request.
         mLogger.d(TAG, "Action hit");
@@ -93,8 +101,19 @@ public class NoteManagerImpl implements NoteManager {
 
         @Override
         public void onSuccess(List<Note> result) {
+            Note currentNote;
             for (Note note : result) {
-                mNoteDao.save(note);
+                // Gets note in local database if it exists.
+                currentNote = mNoteDao.get(note._id);
+                if (currentNote == null) {
+                    // Note isn't in local, we save it.
+                    mNoteDao.save(note);
+                } else if (Long.parseLong(note._revision) != Long.parseLong(currentNote._revision)) {
+                    // Revision of the note on the server is superior of the note in local.
+                    // So we update it.
+                    mNoteDao.update(currentNote._id, note);
+                }
+                // Current note and note from server is equals. We can iterate to the next note.
             }
             mCurrentNotes = result;
             mNext.onSuccess(result);

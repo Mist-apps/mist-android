@@ -20,6 +20,23 @@ public interface TaskDao extends Dao {
     int save(final Note note);
 
     /**
+     * Update tasks of a note in the local database.
+     *
+     * @param identifier Identifier of a note.
+     * @param note       Note to update.
+     * @return rows affected.
+     */
+    int update(final String identifier, final Note note);
+
+    /**
+     * Remove tasks of a note in the local database.
+     *
+     * @param identifier Identifier of a note.
+     * @return rows affected.
+     */
+    int remove(final String identifier);
+
+    /**
      * Gets all tasks of a note.
      *
      * @param note Note potentially concerned by tasks.
