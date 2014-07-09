@@ -1,17 +1,18 @@
 package com.mist.android.managers.users;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.mist.android.globals.ActionDelegate;
 import com.mist.android.login.Token;
 import com.mist.android.login.User;
-import com.mist.android.managers.users.actions.LoginAction;
 import com.mist.android.managers.users.daos.TokenDao;
 import com.mist.android.managers.users.daos.UserDao;
 import com.mist.android.util.LogWrapper;
 
+import retrofit.Callback;
 import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.POST;
@@ -46,11 +47,6 @@ public class UserManagerImpl implements UserManager {
      */
     @Inject
     UserDao mUserDao;
-    /**
-     * Provider to log in the user.
-     */
-    @Inject
-    Provider<LoginAction> mGetLoginAction;
 
     public UserManagerImpl() {
         RestAdapter restAdapter = new RestAdapter.Builder()
@@ -65,7 +61,7 @@ public class UserManagerImpl implements UserManager {
     }
 
     @Override
-    public void login(ActionDelegate<Token> delegate, String login, String password) {
+    public void login(final ActionDelegate<Token> delegate, String login, String password) {
         // Check if we have a session in cache.
         if (mCurrentToken != null && mCurrentToken.isValid()) {
             mLogger.d(TAG, "Cache hit");
@@ -86,37 +82,27 @@ public class UserManagerImpl implements UserManager {
         }
         // Otherwise, we make an online request.
         mLogger.d(TAG, "Action hit");
-        mGetLoginAction.get().perform(mUserInterface, new LoginDelegate(delegate), login, password);
-    }
+        mUserInterface.login(login, password, new Callback<Token>() {
+            @Override
+            public void success(Token token, Response response) {
+                mUserDao.save(token.getUser());
+                mTokenDao.save(token);
+                mCurrentToken = token;
+                delegate.onSuccess(token);
+            }
 
-    /**
-     * Delegate used for the login.
-     */
-    class LoginDelegate implements ActionDelegate<Token> {
-
-        private ActionDelegate<Token> mNext;
-
-        public LoginDelegate(ActionDelegate<Token> next) {
-            mNext = next;
-        }
-
-        @Override
-        public void onSuccess(Token result) {
-            mUserDao.save(result.getUser());
-            mTokenDao.save(result);
-            mCurrentToken = result;
-            mNext.onSuccess(result);
-        }
-
-        @Override
-        public void onError(Exception e) {
-            mNext.onError(e);
-        }
+            @Override
+            public void failure(RetrofitError retrofitError) {
+                // There is only one status code possible,
+                // it is 401 for an invalid login or password.
+                delegate.onError(retrofitError);
+            }
+        });
     }
 
     public interface UserInterface {
         @FormUrlEncoded
         @POST("/login")
-        Token login(@Field("login") String login, @Field("password") String password);
+        void login(@Field("login") String login, @Field("password") String password, Callback<Token> callback);
     }
 }

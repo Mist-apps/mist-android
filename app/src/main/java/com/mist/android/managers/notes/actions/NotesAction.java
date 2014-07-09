@@ -1,11 +1,13 @@
 package com.mist.android.managers.notes.actions;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.mist.android.globals.ActionDelegate;
 import com.mist.android.main.Note;
 import com.mist.android.managers.notes.NoteManagerImpl;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,7 +31,12 @@ public class NotesAction {
 
         @Override
         protected List<Note> doInBackground(String... params) {
-            return mNoteInterface.getAll(params[0]);
+            try {
+                return mNoteInterface.getAll(params[0]);
+            } catch (Exception e) {
+                Log.d("NotesAction", "Error", e);
+            }
+            return Collections.EMPTY_LIST;
         }
 
         @Override

@@ -44,7 +44,7 @@ public class LoginActivity extends RoboFragmentActivity implements ActionDelegat
         super.onCreate(savedInstanceState);
         final Token currentToken = mUserManager.getCurrentToken();
         if (currentToken != null && currentToken.isValid()) {
-            startNextActivity(currentToken);
+            startNextActivity();
         }
         setContentView(R.layout.activity_login);
 
@@ -107,19 +107,18 @@ public class LoginActivity extends RoboFragmentActivity implements ActionDelegat
     @Override
     public void onSuccess(Token result) {
         mValidLoginButton.setEnabled(false);
-        logger.d(TAG, "Token : " + result);
-        startNextActivity(result);
+        startNextActivity();
     }
 
     @Override
     public void onError(Exception e) {
         logger.e(TAG, "Error during the login", e);
         mValidLoginButton.setEnabled(true);
-        mPasswordView.setError(getString(R.string.error_incorrect_password));
+        mPasswordView.setError(getString(R.string.error_invalid_login_password));
         mPasswordView.requestFocus();
     }
 
-    private void startNextActivity(Token currentToken) {
+    private void startNextActivity() {
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }
