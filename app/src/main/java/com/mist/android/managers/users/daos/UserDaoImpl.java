@@ -51,6 +51,28 @@ public class UserDaoImpl extends AbstractDao implements UserDao {
     }
 
     @Override
+    public int remove() {
+        try {
+            open();
+            return mDataBase.delete(DATABASE_TABLE_USER, null, null);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
+    public User get() {
+        try {
+            open();
+            final Cursor c = mDataBase.query(DATABASE_TABLE_USER, ALL_COLUMNS, null, null, null, null, null);
+            final List<User> res = getUsersFromCursor(c);
+            return res.isEmpty() ? null : res.get(0);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
     public User get(String login) {
         if (login == null || login.isEmpty()) {
             return null;

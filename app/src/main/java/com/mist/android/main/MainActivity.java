@@ -1,6 +1,7 @@
 package com.mist.android.main;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,9 +13,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.inject.Inject;
 import com.mist.android.R;
+import com.mist.android.login.LoginActivity;
 import com.mist.android.main.navigation.NavigationDrawerFragment;
 import com.mist.android.main.notes.AllFragment;
+import com.mist.android.managers.users.UserManager;
 
 import roboguice.activity.RoboActionBarActivity;
 
@@ -27,6 +31,12 @@ public class MainActivity extends RoboActionBarActivity implements NavigationDra
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+
+    /**
+     * Manager to handle user information.
+     */
+    @Inject
+    UserManager mUserManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,10 +111,14 @@ public class MainActivity extends RoboActionBarActivity implements NavigationDra
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_logout:
+                mUserManager.logout();
+                startActivity(new Intent(this, LoginActivity.class));
+                finish();
+                return true;
         }
+        
         return super.onOptionsItemSelected(item);
     }
 
@@ -135,7 +149,7 @@ public class MainActivity extends RoboActionBarActivity implements NavigationDra
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
+                                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             return rootView;
         }

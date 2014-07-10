@@ -11,6 +11,11 @@ import java.util.List;
 public interface NoteManager {
 
     /**
+     * Remove all notes of the current user.
+     */
+    void removeAll();
+
+    /**
      * Gets all notes of the current user.
      *
      * @param delegate Delegate to inform the result.

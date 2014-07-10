@@ -60,6 +60,18 @@ public class NoteManagerImpl implements NoteManager {
     }
 
     @Override
+    public void removeAll() {
+        // Clear notes in cache.
+        if (mCurrentNotes != null) {
+            mCurrentNotes.clear();
+        }
+        // Clear notes in database.
+        for (Note note : mNoteDao.getAll()) {
+            mNoteDao.remove(note._id);
+        }
+    }
+
+    @Override
     public void getAll(ActionDelegate<List<Note>> delegate) {
         getAll(delegate, false);
     }

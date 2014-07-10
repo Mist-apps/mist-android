@@ -17,6 +17,20 @@ public interface UserDao extends Dao {
     int save(final User user);
 
     /**
+     * Remove user in the local database.
+     *
+     * @return rows affected.
+     */
+    int remove();
+
+    /**
+     * Gets the first user in the database.
+     *
+     * @return {@link com.mist.android.login.User} object.
+     */
+    User get();
+
+    /**
      * Gets a user according to his login.
      *
      * @param login Login of the user.

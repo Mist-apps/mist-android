@@ -48,6 +48,16 @@ public class TokenDaoImpl extends AbstractDao implements TokenDao {
     }
 
     @Override
+    public int remove() {
+        try {
+            open();
+            return mDataBase.delete(DATABASE_TABLE_TOKEN, null, null);
+        } finally {
+            close();
+        }
+    }
+
+    @Override
     public Token get(String userIdentifier) {
         if (userIdentifier == null || userIdentifier.isEmpty()) {
             return null;

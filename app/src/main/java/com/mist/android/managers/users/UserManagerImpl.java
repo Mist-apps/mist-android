@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import com.mist.android.globals.ActionDelegate;
 import com.mist.android.login.Token;
 import com.mist.android.login.User;
+import com.mist.android.managers.notes.NoteManager;
 import com.mist.android.managers.users.daos.TokenDao;
 import com.mist.android.managers.users.daos.UserDao;
 import com.mist.android.util.LogWrapper;
@@ -29,6 +30,10 @@ public class UserManagerImpl implements UserManager {
      */
     private UserInterface mUserInterface;
     /**
+     * Current user logged.
+     */
+    private User mCurrentUser;
+    /**
      * Current token valid of the user.
      */
     private Token mCurrentToken;
@@ -47,6 +52,11 @@ public class UserManagerImpl implements UserManager {
      */
     @Inject
     UserDao mUserDao;
+    /**
+     * Manager to handle notes of the application in cache, database or online server.
+     */
+    @Inject
+    NoteManager mNoteManager;
 
     public UserManagerImpl() {
         RestAdapter restAdapter = new RestAdapter.Builder()
@@ -56,7 +66,27 @@ public class UserManagerImpl implements UserManager {
     }
 
     @Override
+    public User getCurrentUser() {
+        if (mCurrentUser == null) {
+            mLogger.d(TAG, "Database hit for the current user.");
+            mCurrentUser = mUserDao.get();
+        } else {
+            mLogger.d(TAG, "Cache hit for the current user.");
+        }
+        return mCurrentUser;
+    }
+
+    @Override
     public Token getCurrentToken() {
+        if (mCurrentToken == null) {
+            mLogger.d(TAG, "Database hit for the current token.");
+            User currentUser = getCurrentUser();
+            if (currentUser != null) {
+                mCurrentToken = mTokenDao.get(currentUser._id);
+            }
+        } else {
+            mLogger.d(TAG, "Database hit for the current token.");
+        }
         return mCurrentToken;
     }
 
@@ -64,7 +94,7 @@ public class UserManagerImpl implements UserManager {
     public void login(final ActionDelegate<Token> delegate, String login, String password) {
         // Check if we have a session in cache.
         if (mCurrentToken != null && mCurrentToken.isValid()) {
-            mLogger.d(TAG, "Cache hit");
+            mLogger.d(TAG, "Cache hit to log in the user.");
             delegate.onSuccess(mCurrentToken);
             return;
         }
@@ -73,7 +103,7 @@ public class UserManagerImpl implements UserManager {
         if (user != null) {
             Token token = mTokenDao.get(user._id);
             if (token != null && token.isValid()) {
-                mLogger.d(TAG, "Database hit");
+                mLogger.d(TAG, "Database hit to log in the user.");
                 token.setUser(user);
                 mCurrentToken = token;
                 delegate.onSuccess(token);
@@ -81,12 +111,14 @@ public class UserManagerImpl implements UserManager {
             }
         }
         // Otherwise, we make an online request.
-        mLogger.d(TAG, "Action hit");
+        mLogger.d(TAG, "Action hit to log in the user.");
         mUserInterface.login(login, password, new Callback<Token>() {
             @Override
             public void success(Token token, Response response) {
+                mUserDao.remove();
                 mUserDao.save(token.getUser());
                 mTokenDao.save(token);
+                mCurrentUser = token.getUser();
                 mCurrentToken = token;
                 delegate.onSuccess(token);
             }
@@ -98,6 +130,18 @@ public class UserManagerImpl implements UserManager {
                 delegate.onError(retrofitError);
             }
         });
+    }
+
+    @Override
+    public void logout() {
+        // Remove all notes.
+        mNoteManager.removeAll();
+        // Remove user information in cache.
+        mCurrentUser = null;
+        mCurrentToken = null;
+        // Remove user information in database.
+        mUserDao.remove();
+        mTokenDao.remove();
     }
 
     public interface UserInterface {

@@ -17,6 +17,13 @@ public interface TokenDao extends Dao {
     int save(final Token token);
 
     /**
+     * Remove token in the local database.
+     *
+     * @return rows affected.
+     */
+    int remove();
+
+    /**
      * Gets the token of a user.
      *
      * @param userIdentifier Identifier of a user.
